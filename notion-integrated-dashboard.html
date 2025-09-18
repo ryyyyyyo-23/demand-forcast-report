@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大阪民泊 統合ダッシュボード 2025年9-12月</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: #ffffff;
+            padding: 20px;
+            color: #37352f;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #37352f;
+        }
+        
+        .subtitle {
+            color: #787774;
+            font-size: 1rem;
+        }
+        
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        
+        .kpi-card {
+            background: #f7f6f3;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #37352f;
+            margin-bottom: 4px;
+        }
+        
+        .kpi-label {
+            font-size: 0.875rem;
+            color: #787774;
+        }
+        
+        .kpi-change {
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+        
+        .kpi-up {
+            color: #0f7938;
+        }
+        
+        .kpi-down {
+            color: #eb5757;
+        }
+        
+        .section {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #37352f;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 20px;
+        }
+        
+        .chart-container-small {
+            height: 250px;
+        }
+        
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: #f7f6f3;
+            border-radius: 6px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.875rem;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+        }
+        
+        .alert {
+            background: #fef5e7;
+            border: 1px solid #f9e79f;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-title {
+            font-weight: 600;
+            color: #7d6608;
+            margin-bottom: 8px;
+        }
+        
+        .alert-content {
+            color: #7d6608;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+        
+        th {
+            background: #f7f6f3;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        tr:hover {
+            background: #fafafa;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .status-high {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .status-medium {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+        
+        .status-normal {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+        
+        .progress-bar {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #2e7d32;
+            transition: width 0.3s ease;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+            
+            .kpi-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 大阪民泊 統合ダッシュボード</h1>
+            <div class="subtitle">2025年9月-12月 | 需要予測 × ブッキングカーブ分析 | 2025年9月17日更新</div>
+        </div>
+        
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-value">62%</div>
+                <div class="kpi-label">9月現在OH</div>
+                <div class="kpi-change kpi-down">標準比 -26%</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">48%</div>
+                <div class="kpi-label">万博最終週OH</div>
+                <div class="kpi-change kpi-down">要対応</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">¥18,436</div>
+                <div class="kpi-label">現在平均ADR</div>
+                <div class="kpi-change kpi-up">前年比 +12%</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value">82.9%</div>
+                <div class="kpi-label">9月予想稼働率</div>
+                <div class="kpi-change kpi-up">目標達成</div>
+            </div>
+        </div>
+        
+        <div class="alert">
+            <div class="alert-title">⚠️ 緊急対応が必要な期間</div>
+            <div class="alert-content">
+                • <strong>9/20-23（秋分の日4連休）:</strong> OH45%で進捗遅れ → 価格を+¥2,000-3,000調整<br>
+                • <strong>10/7-13（万博最終週）:</strong> OH48%で集客不足 → 高価格維持しつつ販促強化<br>
+                • <strong>10/13（万博最終日）:</strong> 特別需要期 → 最低¥28,000設定を推奨
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">📈 日別需要予測 × 現在予約状況（OH）</h2>
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(54, 162, 235, 0.8);"></div>
+                    <span>現在OH（予約済み）</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(255, 99, 132, 0.3);"></div>
+                    <span>追加予約見込み</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(75, 192, 192, 1);"></div>
+                    <span>最終予想稼働率</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(255, 206, 86, 1);"></div>
+                    <span>推奨ADR（右軸）</span>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="integratedChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="two-column">
+            <div class="section">
+                <h2 class="section-title">📊 ブッキングカーブ進捗</h2>
+                <div class="chart-container chart-container-small">
+                    <canvas id="bookingCurveChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">📅 月別OH vs 最終予想</h2>
+                <div class="chart-container chart-container-small">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">🎯 重要日の価格戦略</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>期間</th>
+                        <th>イベント</th>
+                        <th>現在OH</th>
+                        <th>予想</th>
+                        <th>進捗</th>
+                        <th>推奨ADR</th>
+                        <th>アクション</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>9/20-23</strong></td>
+                        <td>秋分の日4連休</td>
+                        <td>45%</td>
+                        <td>85%</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 53%; background: #ff9800;"></div>
+                            </div>
+                        </td>
+                        <td><span class="status-badge status-high">¥22,000-25,000</span></td>
+                        <td>即時価格UP</td>
+                    </tr>
+                    <tr>
+                        <td><strong>10/7-13</strong></td>
+                        <td>万博最終週</td>
+                        <td>48%</td>
+                        <td>95%</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 51%; background: #f44336;"></div>
+                            </div>
+                        </td>
+                        <td><span class="status-badge status-high">¥25,000-30,000</span></td>
+                        <td>販促強化</td>
+                    </tr>
+                    <tr>
+                        <td><strong>10/11-13</strong></td>
+                        <td>スポーツの日連休</td>
+                        <td>48%</td>
+                        <td>92%</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 52%; background: #f44336;"></div>
+                            </div>
+                        </td>
+                        <td><span class="status-badge status-high">¥25,000-28,000</span></td>
+                        <td>高価格維持</td>
+                    </tr>
+                    <tr>
+                        <td><strong>11/1-3</strong></td>
+                        <td>文化の日連休</td>
+                        <td>18%</td>
+                        <td>82%</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 22%; background: #4caf50;"></div>
+                            </div>
+                        </td>
+                        <td><span class="status-badge status-medium">¥20,000-23,000</span></td>
+                        <td>計画通り</td>
+                    </tr>
+                    <tr>
+                        <td><strong>11/22-24</strong></td>
+                        <td>勤労感謝の日連休</td>
+                        <td>12%</td>
+                        <td>80%</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 15%; background: #4caf50;"></div>
+                            </div>
+                        </td>
+                        <td><span class="status-badge status-medium">¥20,000-23,000</span></td>
+                        <td>早割展開</td>
+                    </tr>
+                    <tr>
+                        <td><strong>12/27-1/4</strong></td>
+                        <td>年末年始</td>
+                        <td>8%</td>
+                        <td>90%</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 9%; background: #4caf50;"></div>
+                            </div>
+                        </td>
+                        <td><span class="status-badge status-high">¥23,000-28,000</span></td>
+                        <td>超早割</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">💡 価格調整の判断基準</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>リードタイム</th>
+                        <th>標準進捗率</th>
+                        <th>進捗率が低い場合</th>
+                        <th>進捗率が高い場合</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>60日前</td>
+                        <td>25%</td>
+                        <td>価格下げ or 販促</td>
+                        <td>価格上げ検討</td>
+                    </tr>
+                    <tr>
+                        <td>30日前</td>
+                        <td>50%</td>
+                        <td>積極的な価格調整</td>
+                        <td>高価格維持</td>
+                    </tr>
+                    <tr>
+                        <td>14日前</td>
+                        <td>70%</td>
+                        <td>ラストミニッツ割引</td>
+                        <td>価格引き上げ</td>
+                    </tr>
+                    <tr>
+                        <td>7日前</td>
+                        <td>80%</td>
+                        <td>大幅割引検討</td>
+                        <td>プレミアム価格</td>
+                    </tr>
+                    <tr>
+                        <td>3日前</td>
+                        <td>88%</td>
+                        <td>空室損失回避優先</td>
+                        <td>最高価格設定</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // 統合チャートのデータ生成
+        function generateIntegratedData() {
+            const labels = [];
+            const currentOH = [];
+            const remaining = [];
+            const finalOccupancy = [];
+            const recommendedADR = [];
+            
+            const today = new Date(2025, 8, 17); // 9月17日
+            
+            // 主要な日付のみ表示（週2回程度）
+            const displayDates = new Set();
+            
+            for (let month = 9; month <= 12; month++) {
+                const daysInMonth = new Date(2025, month, 0).getDate();
+                
+                for (let day = 1; day <= daysInMonth; day += 4) {
+                    displayDates.add(`${month}/${day}`);
+                }
+                // 月末と重要日を追加
+                displayDates.add(`${month}/${daysInMonth}`);
+            }
+            
+            // 重要日も追加
+            ['9/15', '9/20', '9/23', '10/7', '10/13', '11/3', '11/23', '12/27'].forEach(d => displayDates.add(d));
+            
+            // ソートして配列化
+            const sortedDates = Array.from(displayDates).sort((a, b) => {
+                const [ma, da] = a.split('/').map(Number);
+                const [mb, db] = b.split('/').map(Number);
+                return ma === mb ? da - db : ma - mb;
+            });
+            
+            sortedDates.forEach(dateStr => {
+                const [month, day] = dateStr.split('/').map(Number);
+                const date = new Date(2025, month - 1, day);
+                const daysUntil = Math.floor((date - today) / (1000 * 60 * 60 * 24));
+                
+                labels.push(dateStr);
+                
+                // ブッキングカーブに基づく進捗率
+                let progress = 0;
+                if (daysUntil <= 0) progress = 0.95;
+                else if (daysUntil <= 3) progress = 0.88;
+                else if (daysUntil <= 7) progress = 0.80;
+                else if (daysUntil <= 14) progress = 0.70;
+                else if (daysUntil <= 30) progress = 0.50;
+                else if (daysUntil <= 60) progress = 0.25;
+                else progress = 0.15;
+                
+                // 曜日と特別日による最終予想
+                const weekday = date.getDay();
+                const baseOcc = [75, 48, 45, 46, 52, 68, 80][weekday];
+                let finalOcc = baseOcc;
+                
+                // 特別日と月別調整
+                const holidays = ['9/15', '9/23', '10/13', '11/3', '11/23'];
+                if (holidays.includes(dateStr)) finalOcc *= 1.2;
+                if (month === 10) finalOcc *= 1.1; // 万博効果
+                if (month === 10 && day >= 7 && day <= 13) finalOcc = 95; // 万博最終週
+                
+                finalOcc = Math.min(95, finalOcc);
+                
+                const current = Math.round(finalOcc * progress);
+                const remain = Math.round(finalOcc - current);
+                
+                currentOH.push(current);
+                remaining.push(remain);
+                finalOccupancy.push(Math.round(finalOcc));
+                
+                // 推奨ADR計算
+                let adr = 15000;
+                if (finalOcc >= 85) adr = 24000;
+                else if (finalOcc >= 75) adr = 20000;
+                else if (finalOcc >= 65) adr = 17000;
+                
+                recommendedADR.push(adr);
+            });
+            
+            return { labels, currentOH, remaining, finalOccupancy, recommendedADR };
+        }
+        
+        const integratedData = generateIntegratedData();
+        
+        // 統合チャート
+        const integratedCtx = document.getElementById('integratedChart').getContext('2d');
+        new Chart(integratedCtx, {
+            type: 'bar',
+            data: {
+                labels: integratedData.labels,
+                datasets: [{
+                    type: 'bar',
+                    label: '現在OH',
+                    data: integratedData.currentOH,
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    stack: 'stack0',
+                    yAxisID: 'y'
+                }, {
+                    type: 'bar',
+                    label: '追加予約見込み',
+                    data: integratedData.remaining,
+                    backgroundColor: 'rgba(255, 99, 132, 0.3)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                    stack: 'stack0',
+                    yAxisID: 'y'
+                }, {
+                    type: 'line',
+                    label: '最終予想稼働率',
+                    data: integratedData.finalOccupancy,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.2,
+                    yAxisID: 'y'
+                }, {
+                    type: 'line',
+                    label: '推奨ADR',
+                    data: integratedData.recommendedADR,
+                    borderColor: 'rgba(255, 206, 86, 1)',
+                    backgroundColor: 'rgba(255, 206, 86, 0.1)',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    yAxisID: 'y1'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(context) {
+                                const label = context[0].label;
+                                const [month, day] = label.split('/').map(Number);
+                                const date = new Date(2025, month - 1, day);
+                                const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+                                return `${month}月${day}日（${weekdays[date.getDay()]}）`;
+                            },
+                            afterBody: function(context) {
+                                const oh = context[0].parsed.y;
+                                const remaining = context[1].parsed.y;
+                                const total = oh + remaining;
+                                const progress = Math.round((oh / total) * 100);
+                                return `\n進捗率: ${progress}%`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45,
+                            font: {
+                                size: 10
+                            }
+                        }
+                    },
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        stacked: true,
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: '稼働率 (%)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        beginAtZero: false,
+                        min: 10000,
+                        max: 30000,
+                        title: {
+                            display: true,
+                            text: 'ADR (円)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return '¥' + value.toLocaleString();
+                            }
+                        },
+                        grid: {
+                            drawOnChartArea: false
+                        }
+                    }
+                }
+            }
+        });
+        
+        // ブッキングカーブチャート
+        const bookingCurveCtx = document.getElementById('bookingCurveChart').getContext('2d');
+        new Chart(bookingCurveCtx, {
+            type: 'line',
+            data: {
+                labels: ['90日前', '60日前', '30日前', '14日前', '7日前', '3日前', '当日'],
+                datasets: [{
+                    label: '標準カーブ',
+                    data: [15, 25, 50, 70, 80, 88, 95],
+                    borderColor: '#2e7d32',
+                    backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.3
+                }, {
+                    label: '現在の進捗',
+                    data: [10, 20, 45, 62, 75, 85, null],
+                    borderColor: '#1976d2',
+                    backgroundColor: 'rgba(25, 118, 210, 0.1)',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // 月別比較チャート
+        const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+        new Chart(monthlyCtx, {
+            type: 'bar',
+            data: {
+                labels: ['9月', '10月', '11月', '12月'],
+                datasets: [{
+                    label: '現在OH',
+                    data: [62, 51, 31, 13],
+                    backgroundColor: '#1976d2',
+                    borderColor: '#1976d2',
+                    borderWidth: 1
+                }, {
+                    label: '最終予想',
+                    data: [82, 85, 75, 68],
+                    backgroundColor: 'rgba(255, 152, 0, 0.3)',
+                    borderColor: '#ff9800',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
