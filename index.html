@@ -42,45 +42,6 @@
             font-size: 1rem;
         }
         
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 30px;
-        }
-        
-        .kpi-card {
-            background: #f7f6f3;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-        }
-        
-        .kpi-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #37352f;
-            margin-bottom: 4px;
-        }
-        
-        .kpi-label {
-            font-size: 0.875rem;
-            color: #787774;
-        }
-        
-        .kpi-change {
-            font-size: 0.875rem;
-            margin-top: 4px;
-        }
-        
-        .kpi-up {
-            color: #0f7938;
-        }
-        
-        .kpi-down {
-            color: #eb5757;
-        }
-        
         .section {
             background: white;
             border: 1px solid #e0e0e0;
@@ -127,26 +88,6 @@
             width: 16px;
             height: 16px;
             border-radius: 3px;
-        }
-        
-        .alert {
-            background: #fef5e7;
-            border: 1px solid #f9e79f;
-            border-radius: 6px;
-            padding: 16px;
-            margin-bottom: 20px;
-        }
-        
-        .alert-title {
-            font-weight: 600;
-            color: #7d6608;
-            margin-bottom: 8px;
-        }
-        
-        .alert-content {
-            color: #7d6608;
-            font-size: 0.875rem;
-            line-height: 1.5;
         }
         
         table {
@@ -218,50 +159,14 @@
             .two-column {
                 grid-template-columns: 1fr;
             }
-            
-            .kpi-grid {
-                grid-template-columns: 1fr 1fr;
-            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>日別需要予測</h1>
+            <h1>📊 日別需要予測</h1>
             <div class="subtitle">2025年9月-12月 | 需要予測 × ブッキングカーブ分析 | 2025年9月17日更新</div>
-        </div>
-        
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <div class="kpi-value">62%</div>
-                <div class="kpi-label">9月現在OH</div>
-                <div class="kpi-change kpi-down">標準比 -26%</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-value">48%</div>
-                <div class="kpi-label">万博最終週OH</div>
-                <div class="kpi-change kpi-down">要対応</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-value">¥18,436</div>
-                <div class="kpi-label">現在平均ADR</div>
-                <div class="kpi-change kpi-up">前年比 +12%</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-value">82.9%</div>
-                <div class="kpi-label">9月予想稼働率</div>
-                <div class="kpi-change kpi-up">目標達成</div>
-            </div>
-        </div>
-        
-        <div class="alert">
-            <div class="alert-title">⚠️ 緊急対応が必要な期間</div>
-            <div class="alert-content">
-                • <strong>9/20-23（秋分の日4連休）:</strong> OH45%で進捗遅れ → 価格を+¥2,000-3,000調整<br>
-                • <strong>10/7-13（万博最終週）:</strong> OH48%で集客不足 → 高価格維持しつつ販促強化<br>
-                • <strong>10/13（万博最終日）:</strong> 特別需要期 → 最低¥28,000設定を推奨
-            </div>
         </div>
         
         <div class="section">
@@ -397,52 +302,6 @@
                         </td>
                         <td><span class="status-badge status-high">¥23,000-28,000</span></td>
                         <td>超早割</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        
-        <div class="section">
-            <h2 class="section-title">💡 価格調整の判断基準</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>リードタイム</th>
-                        <th>標準進捗率</th>
-                        <th>進捗率が低い場合</th>
-                        <th>進捗率が高い場合</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>60日前</td>
-                        <td>25%</td>
-                        <td>価格下げ or 販促</td>
-                        <td>価格上げ検討</td>
-                    </tr>
-                    <tr>
-                        <td>30日前</td>
-                        <td>50%</td>
-                        <td>積極的な価格調整</td>
-                        <td>高価格維持</td>
-                    </tr>
-                    <tr>
-                        <td>14日前</td>
-                        <td>70%</td>
-                        <td>ラストミニッツ割引</td>
-                        <td>価格引き上げ</td>
-                    </tr>
-                    <tr>
-                        <td>7日前</td>
-                        <td>80%</td>
-                        <td>大幅割引検討</td>
-                        <td>プレミアム価格</td>
-                    </tr>
-                    <tr>
-                        <td>3日前</td>
-                        <td>88%</td>
-                        <td>空室損失回避優先</td>
-                        <td>最高価格設定</td>
                     </tr>
                 </tbody>
             </table>
